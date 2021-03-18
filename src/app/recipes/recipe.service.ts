@@ -1,5 +1,7 @@
 import {Injectable, EventEmitter} from '@angular/core';
 import {Recipe} from './recipe.model';
+import {Ingredient} from '../shared/ingredient.model';
+import {ShoppingListService} from '../shopping-list/shopping-list.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,18 +12,30 @@ export class RecipeService {
   private recipes: Recipe[] = [
     new Recipe('A Test Recipe',
       'This is simple description',
-      'https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg'
+      'https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg',
+      [
+        new Ingredient('Meat', 1),
+        new Ingredient('French Fries', 20)
+      ]
     ),
     new Recipe('A Test Recipe 2',
       'This is simple description 2',
-      'https://i2.wp.com/www.downshiftology.com/wp-content/uploads/2018/12/Shakshuka-19.jpg'
+      'https://i2.wp.com/www.downshiftology.com/wp-content/uploads/2018/12/Shakshuka-19.jpg',
+      [
+        new Ingredient('Buns', 2),
+        new Ingredient('Meat', 1)
+      ]
     )
   ];
 
-  constructor() {
+  constructor(private shoppingListService: ShoppingListService) {
   }
 
   getRecipes(): Recipe[] {
     return this.recipes.slice();
+  }
+
+  addIngredients(ingredients: Ingredient[]): void {
+    this.shoppingListService.addIngredients(ingredients);
   }
 }

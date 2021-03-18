@@ -23,4 +23,23 @@ export class ShoppingListService {
     this.ingredients.push(ingredient);
     this.ingredientAdded.emit(this.getIngredients());
   }
+
+  addIngredients(newIngredients: Ingredient[]): void {
+    newIngredients.forEach((newIngredient: Ingredient) => {
+      let found = false;
+
+      this.ingredients.forEach((ingredient: Ingredient) => {
+        if (ingredient.name === newIngredient.name) {
+          ingredient.amount += newIngredient.amount;
+          found = true;
+        }
+      });
+
+      if (!found) {
+        this.ingredients.push({...newIngredient});
+      }
+    });
+
+    this.ingredientAdded.emit(this.getIngredients());
+  }
 }
