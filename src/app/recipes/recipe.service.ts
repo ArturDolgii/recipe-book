@@ -10,7 +10,8 @@ export class RecipeService {
   recipeSelected: EventEmitter<Recipe> = new EventEmitter<Recipe>();
 
   private recipes: Recipe[] = [
-    new Recipe('A Test Recipe',
+    new Recipe(1,
+      'A Test Recipe',
       'This is simple description',
       'https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg',
       [
@@ -18,7 +19,8 @@ export class RecipeService {
         new Ingredient('French Fries', 20)
       ]
     ),
-    new Recipe('A Test Recipe 2',
+    new Recipe(2,
+      'A Test Recipe 2',
       'This is simple description 2',
       'https://i2.wp.com/www.downshiftology.com/wp-content/uploads/2018/12/Shakshuka-19.jpg',
       [
@@ -33,6 +35,10 @@ export class RecipeService {
 
   getRecipes(): Recipe[] {
     return this.recipes.slice();
+  }
+
+  getRecipe(id: number): Recipe {
+    return this.recipes.find((recipe: Recipe) => recipe.id === id);
   }
 
   addIngredients(ingredients: Ingredient[]): void {
