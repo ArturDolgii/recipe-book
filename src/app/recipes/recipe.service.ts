@@ -1,4 +1,4 @@
-import {Injectable, EventEmitter} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Recipe} from './recipe.model';
 import {Ingredient} from '../shared/ingredient.model';
 import {ShoppingListService} from '../shopping-list/shopping-list.service';
@@ -7,8 +7,6 @@ import {ShoppingListService} from '../shopping-list/shopping-list.service';
   providedIn: 'root'
 })
 export class RecipeService {
-  recipeSelected: EventEmitter<Recipe> = new EventEmitter<Recipe>();
-
   private recipes: Recipe[] = [
     new Recipe(1,
       'A Test Recipe',
@@ -34,11 +32,40 @@ export class RecipeService {
   }
 
   getRecipes(): Recipe[] {
-    return this.recipes.slice();
+    return [...this.recipes];
   }
 
   getRecipe(id: number): Recipe {
     return this.recipes.find((recipe: Recipe) => recipe.id === id);
+  }
+
+  addRecipe(recipe: Recipe): void {
+    recipe.id = this.getNextId();
+    this.recipes.push(recipe);
+  }
+
+  updateRecipe(recipe: Recipe): void {
+    const index = this.recipes.findIndex((item: Recipe) => item.id === recipe.id);
+    this.recipes[index].name = recipe.name;
+    this.recipes[index].description = recipe.description;
+    this.recipes[index].imagePath = recipe.imagePath;
+    this.recipes[index].ingredients = recipe.ingredients;
+  }
+
+  deleteRecipe(recipe): void {
+    this.recipes = [...this.recipes.filter((item: Recipe) => item.id !== recipe.id)];
+  }
+
+  getNextId(): number {
+    return this.recipes.length ? this.recipes.slice(-1)[0].id + 1 : 1;
+  }
+
+  addIngredient(recipe: Recipe): void {
+    recipe.ingredients.push(new Ingredient('', 0));
+  }
+
+  deleteIngredient(recipe: Recipe, index: number): void {
+    recipe.ingredients.splice(index, 1);
   }
 
   addIngredients(ingredients: Ingredient[]): void {
