@@ -1,54 +1,95 @@
-<div class="form-group">
-  <label for="recipeName">Name</label>
-  <input type="text"
-         class="form-control"
-         id="recipeName"
-         [(ngModel)]="recipe.name">
-</div>
-<div class="form-group">
-  <label for="recipeDescription">Description</label>
-  <input type="text"
-         class="form-control"
-         id="recipeDescription"
-         [(ngModel)]="recipe.description">
-</div>
-<div class="form-group">
-  <div class="row">
-    <div class="col-xs-6">
-      <div class="image">
-        <img [src]="recipe.imagePath">
+<div class="row">
+  <div class="col-xs-12">
+    <form [formGroup]="recipeForm"
+          (ngSubmit)="onSubmit()">
+      <div class="row">
+        <div class="col-xs-6">
+          <button type="submit"
+                  [disabled]="recipeForm.invalid"
+                  class="btn btn-success">Save
+          </button>
+          <button type="button"
+                  class="btn btn-danger"
+                  (click)="cancel()">Cancel
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="col-xs-6">
-      <button class="btn btn-primary"
-              (click)="changeToRandomImage()">change to random image
-      </button>
-    </div>
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text"
+                   id="name"
+                   class="form-control"
+                   formControlName="name">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="form-group">
+            <label for="imagePath">Image Path</label>
+            <input type="text"
+                   id="imagePath"
+                   class="form-control"
+                   formControlName="imagePath"
+                   #imagePath>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
+          <img [src]="imagePath.value" class="img-responsive">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+              rows="6"
+              class="form-control"
+              id="description"
+              formControlName="description"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12"
+             formArrayName="ingredients">
+          <label>Ingredients</label>
+          <div class="row"
+               *ngFor="let ingredient of getIngredients(); let i = index"
+               [formGroupName]="i"
+               style="margin-bottom: 10px;">
+            <div class="col-xs-8">
+              <input type="text"
+                     class="form-control"
+                     formControlName="name">
+            </div>
+            <div class="col-xs-2">
+              <input type="number"
+                     class="form-control"
+                     formControlName="amount">
+            </div>
+            <div class="col-xs-2">
+              <button type="button"
+                      class="btn btn-danger"
+                      (click)="deleteIngredient(i)">X
+              </button>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-xs-12">
+              <button type="button"
+                      class="btn btn-success"
+                      (click)="addIngredient()">Add Ingredient
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
   </div>
 </div>
-<div class="form-group">
-  <label for="recipeIngredientsName">Ingredients</label>
-  <div *ngFor="let ingredient of recipe.ingredients; let i = index"
-       class="row ingredient">
-    <div class="col-xs-4">
-      <input type="text"
-             class="form-control"
-             id="recipeIngredientsName"
-             [(ngModel)]="ingredient.name">
-    </div>
-    <div class="col-xs-4">
-      <input type="number"
-             class="form-control"
-             id="recipeIngredientsAmount"
-             [(ngModel)]="ingredient.amount">
-    </div>
-    <div class="col-xs-4">
-      <button class="btn btn-primary"
-              (click)="deleteIngredient(i)">delete ingredient
-      </button>
-    </div>
-  </div>
-  <button class="btn btn-primary" (click)="addIngredient()">add ingredient</button>
-</div>
-
-<button class="btn btn-success" (click)="save()">Save</button>

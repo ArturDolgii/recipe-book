@@ -1,7 +1,4 @@
-.ingredient {
-  padding: 10px 0;
-}
-
-.image > img {
-  width: 200px;
+input.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+  border: 1px solid red;
 }

@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {Recipe} from '../recipe.model';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {RecipeService} from '../recipe.service';
-import {Ingredient} from '../../shared/ingredient.model';
+import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
+import {Recipe} from '../recipe.model';
 
 @Component({
   selector: 'app-recipe-edit',
@@ -10,8 +10,9 @@ import {Ingredient} from '../../shared/ingredient.model';
   styleUrls: ['./recipe-edit.component.css']
 })
 export class RecipeEditComponent implements OnInit {
-  recipe: Recipe;
   editMode: boolean;
+  id: number;
+  recipeForm: FormGroup;
 
   constructor(private recipeService: RecipeService,
               private activatedRoute: ActivatedRoute,
@@ -20,20 +21,53 @@ export class RecipeEditComponent implements OnInit {
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe((params: Params) => {
-      const recipeId = +params['id'];
-
-      this.editMode = !!recipeId;
-
-      if (this.editMode) {
-        this.recipe = {...this.recipeService.getRecipe(recipeId)};
-      } else {
-        this.recipe = new Recipe(-1, '', '', '', [new Ingredient('', 0)]);
-        this.changeToRandomImage();
-      }
+      this.id = +params['id'];
+      this.editMode = !!this.id;
+      this.initForm();
     });
   }
 
-  save(): void {
+  private initForm(): void {
+    let name = '';
+    let imagePath = '';
+    let description = '';
+    const ingredients = new FormArray([]);
+
+    if (this.editMode) {
+      const recipe = this.recipeService.getRecipe(this.id);
+
+      name = recipe.name;
+      imagePath = recipe.imagePath;
+      description = recipe.description;
+
+      if (recipe.ingredients) {
+        for (const ingredient of recipe.ingredients) {
+          ingredients.push(
+            new FormGroup({
+              name: new FormControl(ingredient.name, Validators.required),
+              amount: new FormControl(ingredient.amount, [
+                Validators.required,
+                Validators.pattern('^[1-9]+[0-9]*$')
+              ])
+            })
+          );
+        }
+      }
+    }
+
+    this.recipeForm = new FormGroup({
+      name: new FormControl(name, Validators.required),
+      imagePath: new FormControl(imagePath, Validators.required),
+      description: new FormControl(description, Validators.required),
+      ingredients
+    });
+  }
+
+  getIngredients(): any {
+    return (this.recipeForm.get('ingredients') as FormArray).controls;
+  }
+
+  onSubmit(): void {
     if (this.editMode) {
       this.updateRecipe();
     } else {
@@ -41,25 +75,45 @@ export class RecipeEditComponent implements OnInit {
     }
   }
 
+  cancel(): void {
+    this.router.navigate(['/recipes', this.id]);
+  }
+
+  addIngredient(): void {
+    (this.recipeForm.get('ingredients') as FormArray).push(
+      new FormGroup({
+        name: new FormControl(null, Validators.required),
+        amount: new FormControl(null, [
+          Validators.required,
+          Validators.pattern('^[1-9]+[0-9]*$')
+        ])
+      })
+    );
+  }
+
+  deleteIngredient(index: number): void {
+    (this.recipeForm.get('ingredients') as FormArray).removeAt(index);
+  }
+
   addRecipe(): void {
-    this.recipeService.addRecipe(this.recipe);
+    const recipe: Recipe = this.createRecipe(this.recipeService.getNextId());
+    this.recipeService.addRecipe(recipe);
     this.router.navigate(['/recipes']);
   }
 
   updateRecipe(): void {
-    this.recipeService.updateRecipe(this.recipe);
-    this.router.navigate(['/recipes', this.recipe.id]);
+    const recipe: Recipe = this.createRecipe(this.id);
+    this.recipeService.updateRecipe(recipe);
+    this.router.navigate(['/recipes', this.id]);
   }
 
-  addIngredient(): void {
-    this.recipeService.addIngredient(this.recipe);
-  }
-
-  deleteIngredient(index: number): void {
-    this.recipeService.deleteIngredient(this.recipe, index);
-  }
-
-  changeToRandomImage(): void {
-    this.recipe.imagePath = 'https://picsum.photos/500?r=' + Date.now();
+  createRecipe(id: number): Recipe {
+    return new Recipe(
+      id,
+      this.recipeForm.value['name'],
+      this.recipeForm.value['description'],
+      this.recipeForm.value['imagePath'],
+      this.recipeForm.value['ingredients']
+    );
   }
 }
